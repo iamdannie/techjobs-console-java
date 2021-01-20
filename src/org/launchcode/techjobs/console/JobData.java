@@ -7,9 +7,11 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by LaunchCode
@@ -57,32 +59,55 @@ public class JobData {
     /**
      * Returns results of search the jobs data by key/value, using
      * inclusion of the search term.
-     *
+     * <p>
      * For example, searching for employer "Enterprise" will include results
      * with "Enterprise Holdings, Inc".
      *
-     * @param column   Column that should be searched.
-     * @param value Value of teh field to search for
+     * @param column Column that should be searched.
+     * @param value  Value of teh field to search for
      * @return List of all jobs matching the criteria
      */
     public static ArrayList<HashMap<String, String>> findByColumnAndValue(String column, String value) {
 
         // load data, if not already loaded
+        //convert job_data.csv into an arraylist of job (reference allJobs variable below line 77)
+        loadData();
+        //this is were all jobs are store that match the search value on line 68
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
+
+        //looping thru all jobs in allJobs, an arraylist of jobs in job_data.csv
+        for (HashMap<String, String> row : allJobs) {
+            //gets column value and stores in aValue (variable)
+            String aValue = row.get(column);
+//      // comparing variable aValue to search value on line 70, added toUpperCase to make it case insensitive.
+
+            if (aValue.toUpperCase().contains(value.toUpperCase())) {
+                // if it match it will add the job
+                jobs.add(row);
+            }
+        }
+        // return job arraylist of matches
+        return jobs;
+    }
+
+    public static ArrayList<HashMap<String, String>> findByValue(String value) {
+
         loadData();
 
         ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
 
         for (HashMap<String, String> row : allJobs) {
 
-            String aValue = row.get(column);
-
-            if (aValue.contains(value)) {
-                jobs.add(row);
+            // looping thru the values of the key/value pairs of each jobs(row)
+            for (String jobData : row.values()) {
+                if (jobData.toUpperCase().contains(value.toUpperCase())) {
+                    jobs.add(row);
+                }
             }
         }
+            return jobs;
+        }
 
-        return jobs;
-    }
 
     /**
      * Read in data from a CSV file and store it in a list
